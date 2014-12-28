@@ -1,5 +1,5 @@
 
-%global rust_version 0.11.0
+%global rust_version 0.12.0
 %global staticprefix rust-%{rust_version}-x86_64-unknown-linux-gnu
 
 %global debug_package %{nil}
@@ -53,13 +53,17 @@ sed -i "s#^%{buildroot}##" %{buildroot}/%{_libdir}/rustlib/manifest
 %files
 %doc COPYRIGHT LICENSE-APACHE LICENSE-MIT README.md
 %{_sysconfdir}/ld.so.conf.d/rust-*.conf
-%{_bindir}/rust*
+%{_bindir}/rustc
+%{_bindir}/rustdoc
 %{_libdir}/lib*
 %{_libdir}/rustlib/*
 %{_datadir}/man/*
 
 
 %changelog
+* Sun Dec 28 2014 Fabian Deutsch <fabiand@fedoraproject.org> - 0.12.0-1
+- Update to 0.12.0
+
 * Sat Jul 05 2014 Fabian Deutsch <fabiand@fedoraproject.org> - 0.11.0-1
 - Initial package
 
