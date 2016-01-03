@@ -1,6 +1,7 @@
 
-%global rust_version 0.12.0
-%global staticprefix rust-%{rust_version}-x86_64-unknown-linux-gnu
+%global rust_version 1.5.0
+%global rust_target %{_target_cpu}-unknown-linux-gnu
+%global staticprefix rust-%{rust_version}-%{rust_target}
 
 %global debug_package %{nil}
 # Do not check any files in docdir for requires
@@ -34,17 +35,22 @@ This package is wrapping the official binary builds.
 %install
 ./install.sh \
     --prefix=%{buildroot}/%{_prefix} --libdir=%{buildroot}/%{_libdir} \
-    --disable-verify
+    --disable-ldconfig \
+    --disable-verify \
+    --verbose
 
 # Create ld.so.conf file
 mkdir -p %{buildroot}/%{_sysconfdir}/ld.so.conf.d
 cat <<EOF | tee /%{buildroot}/%{_sysconfdir}/ld.so.conf.d/rust-%{_target_cpu}.conf
 %{_libdir}/rustlib/
-%{_libdir}/rustlib/%{_target_cpu}-unknown-linux-gnu/lib/
+%{_libdir}/rustlib/%{rust_target}/lib/
 EOF
 
 # Remove buildroot from manifest
-sed -i "s#^%{buildroot}##" %{buildroot}/%{_libdir}/rustlib/manifest
+ls -1 %{buildroot}/%{_libdir}/rustlib/manifest-* | xargs -P 1 -t -- sed -i "s#%{buildroot}##"
+
+# Remove install.log
+rm -v %{buildroot}/%{_libdir}/rustlib/install.log
 
 
 %post -p /sbin/ldconfig
@@ -52,15 +58,23 @@ sed -i "s#^%{buildroot}##" %{buildroot}/%{_libdir}/rustlib/manifest
 
 %files
 %doc COPYRIGHT LICENSE-APACHE LICENSE-MIT README.md
+%doc /usr/share/doc/cargo/
+%doc /usr/share/doc/rust/
 %{_sysconfdir}/ld.so.conf.d/rust-*.conf
 %{_bindir}/rustc
 %{_bindir}/rustdoc
+%{_bindir}/cargo
+%{_bindir}/rust-gdb
 %{_libdir}/lib*
 %{_libdir}/rustlib/*
 %{_datadir}/man/*
+%{_datadir}/zsh/site-functions/_cargo
 
 
 %changelog
+* Sun Jan 03 2016 Fabian Deutsch <fabiand@fedoraproject.org> - 1.5.0-1
+- Update to 1.5.0
+
 * Sun Dec 28 2014 Fabian Deutsch <fabiand@fedoraproject.org> - 0.12.0-1
 - Update to 0.12.0
 
